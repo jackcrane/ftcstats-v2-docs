@@ -93,3 +93,81 @@ ws.onmessage = (event) => {
   console.log(event.data);
 };
 ```
+
+If you are dealing with limited bandwidth or want to change how often you get an update, you can send a message through the websocket connection with the millisecond delay between updates as the message:
+
+```javascript
+const ws = new WebSocket("wss://ftcstats.jackcrane.rocks/api/update/subscribe");
+ws.onopen = () => {
+  console.log("Connected to websocket");
+  // highlight-start
+  ws.send(50); // 50 ms between updates
+  // highlight-end
+};
+ws.onmessage = (event) => {
+  console.log(event.data);
+};
+```
+
+For those curious, the timeout sent through the websocket is used as the delay in a `setInterval` block:
+
+<!-- prettier-ignore -->
+```javascript
+setInterval(() => {
+
+}, timeout);
+```
+
+## Register a webhook
+
+Due to the asynchronous nature of the update methods, you can register a webhook to be triggered when the new update is ready. To do this, hit the following endpoint with a POST request:
+
+```
+https://ftcstats.jackcrane.rocks/api/update/webhook
+```
+
+The body of your request should be a JSON document with the following fields:
+
+```json
+{
+  "wh_url": "https://example.com/webhook",
+  "wh_method": "POST"
+}
+```
+
+<!-- prettier-ignore -->
+| Field  | Note |
+| ---- | ---- |
+| wh_url | The URL for us to send the webhook to. |
+| wh_method | The HTTP method to use when sending the webhook. Must be one of: <ul><li>`GET`</li><li>`POST`</li><li>`PUT`</li><li>`DELETE`</li><li>`PATCH`</li></ul> |
+
+:::tip
+Make sure to specify the `Content-Type` header!
+:::
+
+The API will hit your webhook with the method you requested once the update is finished. There will be no body or additional headers sent. After your webhook has been hit, **it will be deleted from the webhook array**. This means a webhook is only applicable to one update.
+
+## Read last update timestamp
+
+If you want to see when the data was last updated, you can hit the update/last endpoint:
+
+```
+https://ftcstats.jackcrane.rocks/api/update/last
+```
+
+This endpoint will return a JSON document with the following fields:
+
+```json
+{
+  "_id": "61f95131b885e2a4e9b62891",
+  "timestamp": "2022-02-01T15:26:41.316Z",
+  "total": 8330
+}
+```
+
+<!-- prettier-ignore -->
+| Field | Note |
+| ---- | ---- |
+| _id | The id of the last update. This is a *nonce*[^2] so you can use it to detect changes. |
+
+[^2]: Nonce: _noun_, the present, or immediate, occasion or purpose (usually used in the phrase for the nonce).
