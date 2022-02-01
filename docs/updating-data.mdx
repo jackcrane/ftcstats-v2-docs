@@ -1,0 +1,95 @@
+---
+sidebar_position: 1
+---
+
+# Data updates
+
+## Requesting a data update
+
+Because of the nature of the API, we need to ask the official FTCStats website for a data update. This data update takes about 5 minutes, so we only do it a few times. We automatically update every night at midnight, but you can request more up-to-date data if you need it.
+
+To request a new data update, hit the following endpoint with a GET request:
+
+```
+https://ftcstats.jackcrane.rocks/api/update
+```
+
+It will return the following JSON document:
+
+```json
+{
+  "ok": true,
+  "new": true,
+  "note": "Processing. Check the /api/update/status endpoint for progress."
+}
+```
+
+| Field | Note                                                                                                                                                                                                                                                  |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ok    | The ok field will be true if the API will be working on updating the data. **This field will be true if either you or any other user triggered an update**.                                                                                           |
+| new   | The new field will be true if your request triggered an update. It will be false if the API is already working on an update. Even if this is false, as long as the `ok` field is true, an update is being fetched and will be ready in a few minutes. |
+| note  | The note field will provide helpful development messages. No critical data will be in this field and can be safely ignored in production.                                                                                                             |
+
+## Monitoring updates
+
+Because the updates can take several minutes, they should be run in an asynchronous manner. The update request will resolve immediately and the update will be fetched in the background. You can check the status of the update by hitting the following endpoint:
+
+```
+https://ftcstats.jackcrane.rocks/api/update/status
+```
+
+This endpoint will return one of 2 possible JSON document formats:
+
+### If an update is _not_ in the works
+
+```json
+{ "processing": false }
+```
+
+### If an update _is_ in the works
+
+```json
+{
+  "processing": true,
+  "inserted": 207,
+  "total": 8263,
+  "percentage": 2.53,
+  "stage": "Processing...",
+  "timing": {
+    "elapsed": 13,
+    "remaining": 317
+  }
+}
+```
+
+<!-- prettier-ignore -->
+| Field | Note|
+| ---- | ---- |
+| processing | The processing field will be true if the API is working on updating the data. It will be false if the API is not working on an update, and true if an update is in the works. **This is the only field that is consistent across all possible states of this endpoint, meaning it should be the main point of application logic**. |
+| inserted| The count of records that have been inserted into the database at the time of the request. |
+| total | The total count of records queued to be entered into the database. |
+| percentage | `inserted`/`total` |
+| stage | The current stage of the update, mostly for debugging or explanative purposes. Will be one of the following: <ul><li>`loading`</li><li>`Connecting to database`</li><li>`Fetching data from ftcstats.org`</li><li>`Parsing data`</li><li>`Selecting data`</li><li>`Processing...`</li><li>`Finished`</li></ul> These are listed in the correct order and case.|
+| timing | An object containing the following fields: <ul><li>`elapsed` (the number of seconds the backend has been working on the update)</li><li> `remaining` (the _estimated_[^1] number of seconds left before the update is finished)</li></ul> |
+
+[^1]: The estimate is calculated at the beginning of the update and is not updated as the update progresses. We have calculated that each record takes roughly 40 milliseconds, so we can estimate the total expected time by multiplying the total number of records by 40 milliseconds, then we subtract elapsed time from that number. **This is not an exact calculation, but it is a reasonable estimate**. If you need a more accurate estimate, the percentage field is dynamically calculated and is the closest indicator of progress, and you can calculate the timing yourself.
+
+## Subscribing to updates
+
+If you don't want to repeatedly hit the update/status endpoint, we also provide a websocket endpoint at the following URL:
+
+```
+wss://ftcstats.jackcrane.rocks/api/update/subscribe
+```
+
+(Websockets are hard for many devs so here is a basic implementation in JavaScript.)
+
+```javascript
+const ws = new WebSocket("wss://ftcstats.jackcrane.rocks/api/update/subscribe");
+ws.onopen = () => {
+  console.log("Connected to websocket");
+};
+ws.onmessage = (event) => {
+  console.log(event.data);
+};
+```
