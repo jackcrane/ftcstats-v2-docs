@@ -1,0 +1,95 @@
+---
+sidebar_position: 2
+---
+
+# Teams
+
+Information on all teams who have submitted scores can be found here.
+
+## Listing teams
+
+You can request a list of all teams who have submitted scores by sending a GET request to the following URL:
+
+```
+https://ftcstats.jackcrane.rocks/api/teams/list
+```
+
+This endpoint will return a JSON array:
+
+```json
+[
+  "18305",
+  "7172",
+  "14663",
+  "8468",
+  "14300",
+  ...
+]
+```
+
+Duplicates have been removed.
+
+## Getting all records for a team
+
+You can request all records for a team by sending a GET request to the following URL:
+
+```
+https://ftcstats.jackcrane.rocks/api/teams
+```
+
+With the body:
+
+```json
+{
+  "name": "Team Name"
+}
+```
+
+or
+
+```json
+{
+  "number": "12345"
+}
+```
+
+The API will return a JSON array of [PerformanceEntity](performance-entity) objects.
+
+## Exchange a team number for a name (or vice versa)
+
+If you have a team number or name, you can get more information on the teams, like `name`, `number`, `details`, as well as [PerformanceEntity](performance-entity) objects.
+
+```
+https://ftcstats.jackcrane.rocks/api/teams/exchange
+```
+
+With the body
+
+```json
+{
+  "number": "12345"
+}
+```
+
+or
+
+```json
+{
+  "name": "name"
+}
+```
+
+This endpoint will return:
+
+```json
+{
+  "num": "12345",
+  "name": "name",
+  "details": "https://ftc-events.firstinspires.org/2021/team/12345",
+  "entities": [
+    PerformanceEntity,
+    PerformanceEntity,
+    ...
+  ]
+}
+```

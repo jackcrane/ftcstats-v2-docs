@@ -1,0 +1,113 @@
+---
+sidebar_position: 19
+---
+
+# The PerformanceEntity Object
+
+The `PerformanceEntity` object is used to represent a single score from the database. It follows a consistent schema outlined here.
+
+## Example
+
+```json
+{
+  "_id": "61f9d73563d97502208221b4",
+  "rank": 1,
+  "abrank": 1,
+  "team": {
+    "num": "18305",
+    "name": "Singularity",
+    "details": "https://ftc-events.firstinspires.org/2021/team/18305"
+  },
+  "oprs": {
+    "opr": 216.7,
+    "normalized": 216.7,
+    "non_penalty": 216.7,
+    "auto": 59.2,
+    "teleop": 97.5,
+    "endgame": 60
+  },
+  "np": 216.7,
+  "average": 216.7,
+  "max_np": 241,
+  "details": {
+    "auto": {
+      "freight": 5
+    },
+    "teleop": {
+      "high": 15,
+      "mid": 0,
+      "shared": 0
+    },
+    "endgame": {
+      "ducks": 8,
+      "shared": 0,
+      "cap": 0
+    }
+  },
+  "event": {
+    "name": "Virginia VA Remote Event 1 01/09/22",
+    "state": "Virginia"
+  },
+  "quals_rank": 1,
+  "avg_rp": 216.7,
+  "avg_opp": null,
+  "matches_played": 6,
+  "event_type": "remote",
+  "record": {
+    "w": null,
+    "l": null,
+    "t": null
+  }
+}
+```
+
+## Explanation
+
+<!-- prettier-ignore -->
+| Field | Type | Description |
+|:------|:-----|:------------|
+| `_id` | `string` | The MongoDB ObjectID of the score entry. This is the unique identifier of this entry and can be used to differentiate between different entries. **It is not preserved between data updates**. This means it is fine to use this field for analysis when using the same update, but not between different updates, as the same entry will have a different `_id`. |
+| `rank` | `number` | The official rank of the team. If the team is tied with another team, both will have the same rank |
+| `abrank` | `number` | The unofficial rank of the team based on normal rank and alphabetization. This means no teams will have the same rank, if 2 teams are tied, the team that alphabetically comes first will get the better rank. **Error will compound in this field**. Because ties are not skipped, the difference between the official rank and this field will grow. <br/><br/>This *is* helpful in determining percentiles or how many teams are ahead of an entry. |
+| `team` | `object` | The team object. This is an object with the following fields: |
+| &nbsp &nbsp `team.num` | `string` | The team number. |
+| &nbsp &nbsp `team.name` | `string` | The team name. |
+| &nbsp &nbsp `team.details` | `string` | The URL to the team's details page on FIRST's official page. |
+| `oprs` | `object` | The OPRs for the match. This is an object with the following fields: |
+| &nbsp &nbsp `oprs.opr` | `number` | The OPR[^opr] for the match. |
+| &nbsp &nbsp `oprs.normalized` | `number` | The normalized OPR[^norm-opr] for the match. |
+| &nbsp &nbsp `oprs.non_penalty` | `number` | The non-penalty OPRc[^oprc] for the match. |
+| &nbsp &nbsp `oprs.auto` | `number` | The auto OPRc[^oprc] for the match. |
+| &nbsp &nbsp `oprs.teleop` | `number` | The teleop OPRc[^oprc] for the match. |
+| &nbsp &nbsp `oprs.endgame` | `number` | The endgame OPRc[^oprc] for the match. |
+| `np` | `number` | The non-penalty average score for the event. |
+| `average` | `number` | The average average score for the event (with penalties). |
+| `max_np` | `number` | The maximum non-penalty score for the event. |
+| `details` | `object` | The details on the teams performance in the match. This is an object with the following fields: |
+| &nbsp &nbsp `details.auto` | `object` | The auto details for the match. This is an object with the following fields: |
+| &nbsp &nbsp &nbsp &nbsp `details.auto.freight` | `number` | The average number of times the team delivered a freight element in auto. |
+| &nbsp &nbsp `details.teleop` | `object` | The teleop details for the match. This is an object with the following fields: |
+| &nbsp &nbsp &nbsp &nbsp `details.teleop.high` | `number` | The average number of times the team delivered a freight element in the high tier in teleop. |
+| &nbsp &nbsp &nbsp &nbsp `details.teleop.mid` | `number` | The average number of times the team delivered a freight element in the low tier in teleop. |
+| &nbsp &nbsp &nbsp &nbsp `details.teleop.shared` | `number` | The average number of times the team delivered a freight element in the shared shipping hub in teleop. |
+| &nbsp &nbsp `details.endgame` | `object` | The endgame details for the match. This is an object with the following fields: |
+| &nbsp &nbsp &nbsp &nbsp `details.endgame.ducks` | `number` | The average number of times the team delivered a duck in endgame. |
+| &nbsp &nbsp &nbsp &nbsp `details.endgame.cap` | `number` | The average number of times the team delivered a cap in endgame. |
+| &nbsp &nbsp &nbsp &nbsp `details.endgame.shared` | `number` | The average number of times the shared shipping hub was tipped towards the team in endgame. |
+| `event` | `object` | The event object. This is an object with the following fields: |
+| &nbsp &nbsp `event.name` | `string` | The name of the event |
+| &nbsp &nbsp `event.state` | `string` | The state of the event. Note some states (i.e. California) are broken up |
+| `quals_rank` | `number` | The rank of the team in the event. |
+| `avg_rp` | `number` | The average RP[^rp] for the team. |
+| `avg_opp` | `number` \|\| `null` | The average opponent's score for the team. This will be `null` if the it was a remote tournament. |
+| `matches_played` | `number` | The number of matches played by the team. |
+| `event_type` | `string` | The type of event. This can either `local` or `remote` |
+| `record` | `object` | The record for the team. **If this is a remote tournament, each of these will be `null`**. This is an object with the following fields: |
+| &nbsp &nbsp `record.w` | `number` \|\| `null` | The number of wins. |
+| &nbsp &nbsp `record.l` | `number` \|\| `null` | The number of losses. |
+| &nbsp &nbsp `record.t` | `number` \|\| `null` | The number of ties. |
+
+[^opr]: OPR (Offensive Power Rating): A fairly common way to compute team offense in FRC. [How OPRs work](https://blog.thebluealliance.com/2017/10/05/the-math-behind-opr-an-introduction/)
+[^oprc]: Similar to OPR but we are instead minimizing the Ax-b linear equation rather than solving for Ax=b in order to apply constraints such as ensuring scores >= 0 and imposing upper bounds on game-specific performance.
+[^norm-opr]: Normalized/Non-penalty OPR/OPRc: If available, this is the OPR/OPRc when all penalties are removed from matches. For 2021-2022 Freight Frenzy, Normalized OPR includes subtracted penalties.
+[^rp]: RP (Ranking Points): Ranking Points/Total Ranking Points - The first basis for ranking Teams. In _remote events_, For a single Team competing remotely, the Team's final score for a Match is used as their Ranking Points. In _traditional events_: For Teams that compete at a traditional Tournament, each Team receives their alliance's final score for a Match as Ranking Points. Total Ranking Points is the sum of the Ranking Points of all non-Surrogate Matches that a Team plays in a Tournament. Please see section 5.0 for further explanation for how this is used to determine a Team's ranking.

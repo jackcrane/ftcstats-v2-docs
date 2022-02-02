@@ -1,0 +1,85 @@
+---
+sidebar_position: 1
+---
+
+# Selecting data by OPR
+
+## What _is_ an OPR?
+
+:::tip
+
+### TL;DR
+
+OPRs are really complicated and hard to calculate. In the most simple of terms, it is an estimation of a team's individual contribution to the matches in which they competed. **For those of us who don't quite understand the stats, the higher the better.**
+:::
+
+Bear with us, OPRs are very mathy.
+
+> OPR is now the more widely used term for what Karthik from Team 1114 once called "calculated contribution" — OPR attempts to calculate a team's contribution to their alliance's final score. If there were no alliances in FRC, a team's calculated contribution would simply be their average match score. This is an easy and straightforward metric to calculate. However, using average score with alliances, while giving you a positive predictor, isn't the most useful since the average score is a combination of the performance of all three teams on the alliance. 1114 starting using OPR in 2004 because they wanted a more useful metric to evaluate how teams had been playing than average score. They wanted a way to figure out, on average, what each team was contributing to their alliance's score. Here, OPR makes a key assumption: an alliance's final score is a linear combination of each alliance member's individual contribution. In other words, adding together the points earned by each member on a 3-team alliance results in the alliance's final score.
+>
+> \- [The Blue Alliance](https://blog.thebluealliance.com/2017/10/05/the-math-behind-opr-an-introduction/)
+
+### Types of OPRs
+
+In addition to the simple average OPR, FTCStats also provides us OPRs for each phase of play, as well as a penalty-free OPR.
+
+The non penalty, Auto, Teleop, and End Game OPR's are more specifically called OPRc's, which are similar to OPR but we are instead minimizing the Ax-b linear equation rather than solving for Ax=b in order to apply constraints such as ensuring scores >= 0 and imposing upper bounds on game-specific performance.
+
+## API Requests
+
+Requests regarding OPRs are made using GET requests to the following endpoint:
+
+```
+https://ftcstats.jackcrane.rocks/api/performance/:type
+```
+
+The `type` parameter is required and can be one of the following:
+
+- `opr`
+- `normalized`
+- `non_penalty`
+- `auto`
+- `teleop`
+- `end_game`
+
+The request should include an object in which you specify the values and logical operators you want to filter by:
+
+```json
+{
+  "operator": ">",
+  "value": 0.5
+}
+```
+
+<!-- prettier-ignore -->
+| Field | Type | Description |
+|----|----|----|
+| `operator` | `string` | The logical operator to use when comparing the value to the field. Refer to the following table for availible operators |
+| `value` | `number` | The value to compare the field to. |
+
+#### Operators
+
+<!-- prettier-ignore -->
+| Operator | MongoDB relation | Description |
+|----|----|----|
+| `>` | `$gt` | Greater than |
+| `>=` | `$gte` | Greater than or equal to |
+| `<` | `$lt` | Less than |
+| `<=` | `$lte` | Less than or equal to |
+| `==` | `$eq` | Equal to |
+| `!=` | `$ne` | Not equal to |
+
+The API will return a JSON document with an array of [PerformanceEntity](../performance-entity) objects:
+
+```json
+{
+  "count": 5,
+  "entities": {
+    [
+      PerformanceEntity,
+      PerformanceEntity,
+      ...
+    ]
+  }
+}
+```
