@@ -6,15 +6,15 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "My Site",
-  tagline: "Dinosaurs are cool",
+  title: "FTCStats API",
+  tagline: "Bringing better data to the FTC community",
   url: "https://your-docusaurus-test-site.com",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  organizationName: "facebook", // Usually your GitHub org/user name.
-  projectName: "docusaurus", // Usually your repo name.
+  organizationName: "jackcrane", // Usually your GitHub org/user name.
+  projectName: "ftcstats-v2-docs", // Usually your repo name.
 
   presets: [
     [
@@ -38,17 +38,17 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: "My Site",
+        title: "FTCStats API",
         logo: {
-          alt: "My Site Logo",
-          src: "img/logo.svg",
+          alt: "FIRST Logo",
+          src: "https://ftclayer-docs.pages.dev/img/logo.svg",
         },
         items: [
           {
             type: "doc",
             docId: "intro",
             position: "left",
-            label: "Tutorial",
+            label: "Docs",
           },
           {
             href: "https://github.com/facebook/docusaurus",
@@ -96,7 +96,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} FTCStats API. Data owned by FTCStats, not us. Not affiliated with FTCStats.org. Built with Docusaurus, hosted on Cloudflare Pages.`,
       },
       prism: {
         theme: lightCodeTheme,
